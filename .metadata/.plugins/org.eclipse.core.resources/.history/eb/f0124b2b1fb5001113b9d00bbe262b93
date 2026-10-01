@@ -1,0 +1,5 @@
+package hospital_backend.config;
+
+public class SystemSettingInitializer {
+
+}

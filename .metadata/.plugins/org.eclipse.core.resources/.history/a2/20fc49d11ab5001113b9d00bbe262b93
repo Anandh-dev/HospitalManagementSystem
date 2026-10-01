@@ -1,0 +1,5 @@
+package hospital_backend.dto;
+
+public class SystemSettingRequest {
+
+}

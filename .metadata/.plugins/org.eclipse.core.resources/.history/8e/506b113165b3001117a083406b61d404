@@ -1,0 +1,74 @@
+package hospital_backend.controller;
+
+import java.util.List;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import hospital_backend.entity.Patient;
+import hospital_backend.service.PatientService;
+
+@RestController
+@RequestMapping("/api/patients")
+@CrossOrigin(origins = "http://localhost:5173")
+public class PatientController {
+
+    private final PatientService patientService;
+
+    public PatientController(PatientService patientService) {
+        this.patientService = patientService;
+    }
+
+    // Get all patients
+    @GetMapping
+    public ResponseEntity<List<Patient>> getAllPatients() {
+
+        return ResponseEntity.ok(
+                patientService.getAllPatients()
+        );
+    }
+
+    // Get patient by database ID
+    @GetMapping("/{id}")
+    public ResponseEntity<Patient> getPatientById(
+            @PathVariable Long id) {
+
+        return ResponseEntity.ok(
+                patientService.getPatientById(id)
+        );
+    }
+
+    // Get patient by hospital patient number
+    @GetMapping("/number/{patientNumber}")
+    public ResponseEntity<Patient> getPatientByNumber(
+            @PathVariable String patientNumber) {
+
+        return ResponseEntity.ok(
+                patientService.getPatientByNumber(patientNumber)
+        );
+    }
+
+    // Get patient by mobile number
+    @GetMapping("/mobile/{mobileNumber}")
+    public ResponseEntity<Patient> getPatientByMobile(
+            @PathVariable String mobileNumber) {
+
+        return ResponseEntity.ok(
+                patientService.getPatientByMobile(mobileNumber)
+        );
+    }
+
+    // Create patient
+    @PostMapping
+    public ResponseEntity<Patient> createPatient(
+            @RequestBody Patient patient) {
+
+        Patient createdPatient =
+                patientService.createPatient(patient);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(createdPatient);
+    }
+}

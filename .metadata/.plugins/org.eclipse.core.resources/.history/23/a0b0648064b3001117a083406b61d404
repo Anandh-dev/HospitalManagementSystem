@@ -1,0 +1,16 @@
+package hospital_backend.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+
+import hospital_backend.entity.PatientSequence;
+
+import jakarta.persistence.LockModeType;
+
+public interface PatientSequenceRepository
+        extends JpaRepository<PatientSequence, Long> {
+
+    @Override
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    java.util.Optional<PatientSequence> findById(Long id);
+}

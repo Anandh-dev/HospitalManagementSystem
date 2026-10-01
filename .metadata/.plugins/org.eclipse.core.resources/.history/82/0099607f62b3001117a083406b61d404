@@ -1,0 +1,5 @@
+package hospital_backend.controller;
+
+public class PatientController {
+
+}

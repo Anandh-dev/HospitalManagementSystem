@@ -1,0 +1,57 @@
+package hospital_backend.service;
+
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import hospital_backend.entity.Patient;
+import hospital_backend.repository.PatientRepository;
+
+@Service
+public class PatientService {
+
+    private final PatientRepository patientRepository;
+
+    public PatientService(PatientRepository patientRepository) {
+        this.patientRepository = patientRepository;
+    }
+
+    public List<Patient> getAllPatients() {
+        return patientRepository.findAll();
+    }
+
+    public Patient getPatientById(Long patientId) {
+        return patientRepository.findById(patientId)
+                .orElseThrow(() ->
+                        new RuntimeException("Patient not found"));
+    }
+
+    public Patient getPatientByNumber(String patientNumber) {
+        return patientRepository.findByPatientNumber(patientNumber)
+                .orElseThrow(() ->
+                        new RuntimeException("Patient not found"));
+    }
+
+    public Patient getPatientByMobile(String mobileNumber) {
+        return patientRepository.findByMobileNumber(mobileNumber)
+                .orElseThrow(() ->
+                        new RuntimeException("Patient not found"));
+    }
+    
+    public Patient createPatient(Patient patient) {
+
+        if (patientRepository.findByMobileNumber(patient.getMobileNumber()).isPresent()) {
+            throw new RuntimeException(
+                    "A patient with this mobile number already exists"
+            );
+        }
+
+        long nextNumber = patientRepository.count() + 1;
+
+        String patientNumber = String.format("P%06d", nextNumber);
+
+        patient.setPatientNumber(patientNumber);
+
+        return patientRepository.save(patient);
+    }
+}

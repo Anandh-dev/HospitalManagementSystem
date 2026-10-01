@@ -1,0 +1,173 @@
+package hospital_backend.service;
+
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import hospital_backend.dto.SystemSettingRequest;
+import hospital_backend.dto.SystemSettingResponse;
+import hospital_backend.entity.SystemSetting;
+import hospital_backend.repository.SystemSettingRepository;
+import hospital_backend.exception.InvalidSettingValueException;
+import hospital_backend.exception.SettingNotFoundException;
+
+@Service
+@Transactional
+public class SystemSettingService {
+
+    private static final String TYPE_STRING = "STRING";
+    private static final String TYPE_INTEGER = "INTEGER";
+    private static final String TYPE_BOOLEAN = "BOOLEAN";
+
+    private final SystemSettingRepository systemSettingRepository;
+
+    public SystemSettingService(SystemSettingRepository systemSettingRepository) {
+        this.systemSettingRepository = systemSettingRepository;
+    }
+
+    @Transactional(readOnly = true)
+    public List<SystemSettingResponse> getAllSettings() {
+        return systemSettingRepository.findAll()
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public SystemSettingResponse getSetting(String key) {
+        String normalizedKey = normalizeKey(key);
+
+        SystemSetting setting = systemSettingRepository.findBySettingKey(normalizedKey)
+                .orElseThrow(() ->
+                        new SettingNotFoundException(
+                                "Setting not found: " + normalizedKey));
+
+        return toResponse(setting);
+    }
+
+    public SystemSettingResponse createOrUpdateSetting(SystemSettingRequest request) {
+        String normalizedKey = normalizeKey(request.getSettingKey());
+        String normalizedType = normalizeType(request.getSettingType());
+        String normalizedValue = normalizeValue(request.getSettingValue());
+
+        validateSettingType(normalizedType);
+        validateSettingValue(normalizedValue, normalizedType);
+
+        SystemSetting setting = systemSettingRepository
+                .findBySettingKey(normalizedKey)
+                .orElseGet(SystemSetting::new);
+
+        setting.setSettingKey(normalizedKey);
+        setting.setSettingValue(normalizedValue);
+        setting.setSettingType(normalizedType);
+        setting.setDescription(normalizeDescription(request.getDescription()));
+
+        return toResponse(systemSettingRepository.save(setting));
+    }
+
+    public SystemSettingResponse updateSetting(
+            String key,
+            SystemSettingRequest request) {
+
+        String normalizedKey = normalizeKey(key);
+
+        SystemSetting setting = systemSettingRepository
+                .findBySettingKey(normalizedKey)
+                .orElseThrow(() ->
+                        new SettingNotFoundException(
+                                "Setting not found: " + normalizedKey));
+
+        String requestKey = normalizeKey(request.getSettingKey());
+
+        if (!normalizedKey.equals(requestKey)) {
+            throw new IllegalArgumentException(
+                    "Request setting key does not match the URL setting key");
+        }
+
+        String normalizedType = normalizeType(request.getSettingType());
+        String normalizedValue = normalizeValue(request.getSettingValue());
+
+        validateSettingType(normalizedType);
+        validateSettingValue(normalizedValue, normalizedType);
+
+        setting.setSettingValue(normalizedValue);
+        setting.setSettingType(normalizedType);
+        setting.setDescription(normalizeDescription(request.getDescription()));
+
+        return toResponse(systemSettingRepository.save(setting));
+    }
+
+    private void validateSettingType(String settingType) {
+        if (!TYPE_STRING.equals(settingType)
+                && !TYPE_INTEGER.equals(settingType)
+                && !TYPE_BOOLEAN.equals(settingType)) {
+
+            throw new InvalidSettingValueException(
+                    "Unsupported setting type: " + settingType
+                            + ". Supported types are STRING, INTEGER and BOOLEAN");
+        }
+    }
+
+    private void validateSettingValue(String value, String type) {
+
+        if (TYPE_INTEGER.equals(type)) {
+            try {
+                Integer.parseInt(value);
+            } catch (NumberFormatException exception) {
+                throw new InvalidSettingValueException(
+                        "Setting value must be a valid integer");
+            }
+        }
+
+        if (TYPE_BOOLEAN.equals(type)) {
+            if (!"true".equalsIgnoreCase(value)
+                    && !"false".equalsIgnoreCase(value)) {
+
+                throw new InvalidSettingValueException(
+                        "Setting value must be true or false");
+            }
+        }
+    }
+
+    private String normalizeKey(String key) {
+        if (key == null || key.isBlank()) {
+            throw new IllegalArgumentException("Setting key is required");
+        }
+
+        return key.trim().toUpperCase();
+    }
+
+    private String normalizeType(String type) {
+        if (type == null || type.isBlank()) {
+            throw new IllegalArgumentException("Setting type is required");
+        }
+
+        return type.trim().toUpperCase();
+    }
+
+    private String normalizeValue(String value) {
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException("Setting value is required");
+        }
+
+        return value.trim();
+    }
+
+    private String normalizeDescription(String description) {
+        if (description == null || description.isBlank()) {
+            return null;
+        }
+
+        return description.trim();
+    }
+
+    private SystemSettingResponse toResponse(SystemSetting setting) {
+        return new SystemSettingResponse(
+                setting.getId(),
+                setting.getSettingKey(),
+                setting.getSettingValue(),
+                setting.getSettingType(),
+                setting.getDescription());
+    }
+}

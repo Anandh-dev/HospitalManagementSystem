@@ -1,0 +1,201 @@
+package hospital_backend.entity;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "patient")
+public class Patient {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "patient_id")
+    private Long patientId;
+
+    @Column(
+        name = "patient_number",
+        nullable = false,
+        unique = true,
+        length = 20
+    )
+    private String patientNumber;
+
+    @Column(
+        name = "full_name",
+        nullable = false,
+        length = 100
+    )
+    private String fullName;
+
+    @Column(name = "date_of_birth")
+    private LocalDate dateOfBirth;
+
+    @Column(
+        name = "gender",
+        nullable = false,
+        length = 20
+    )
+    private String gender;
+
+    @Column(
+        name = "mobile_number",
+        nullable = false,
+        length = 15
+    )
+    private String mobileNumber;
+
+    @Column(
+        name = "whatsapp_number",
+        length = 15
+    )
+    private String whatsappNumber;
+
+    @Column(
+        name = "email",
+        length = 150
+    )
+    private String email;
+
+    @Column(
+        name = "address",
+        length = 255
+    )
+    private String address;
+
+    @Column(
+        name = "created_at",
+        nullable = false
+    )
+    private LocalDateTime createdAt;
+
+    @Column(
+        name = "updated_at",
+        nullable = false
+    )
+    private LocalDateTime updatedAt;
+
+
+    @PrePersist
+    protected void onCreate() {
+
+        LocalDateTime now = LocalDateTime.now();
+
+        createdAt = now;
+        updatedAt = now;
+    }
+
+
+    @PreUpdate
+    protected void onUpdate() {
+
+        updatedAt = LocalDateTime.now();
+    }
+
+
+    public Long getPatientId() {
+        return patientId;
+    }
+
+    public void setPatientId(Long patientId) {
+        this.patientId = patientId;
+    }
+
+
+    public String getPatientNumber() {
+        return patientNumber;
+    }
+
+    public void setPatientNumber(String patientNumber) {
+        this.patientNumber = patientNumber;
+    }
+
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+
+    public LocalDate getDateOfBirth() {
+        return dateOfBirth;
+    }
+
+    public void setDateOfBirth(LocalDate dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+    }
+
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+
+    public String getMobileNumber() {
+        return mobileNumber;
+    }
+
+    public void setMobileNumber(String mobileNumber) {
+        this.mobileNumber = mobileNumber;
+    }
+
+
+    public String getWhatsappNumber() {
+        return whatsappNumber;
+    }
+
+    public void setWhatsappNumber(String whatsappNumber) {
+        this.whatsappNumber = whatsappNumber;
+    }
+
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+}

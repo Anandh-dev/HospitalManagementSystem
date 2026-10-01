@@ -1,0 +1,5 @@
+package hospital_backend.entity;
+
+public class PatientSequence {
+
+}
